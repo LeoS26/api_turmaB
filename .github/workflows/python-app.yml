@@ -48,3 +48,22 @@ jobs:
           push: true
           tags: leonardo2608/api_homologacao:latest
     
+  deploy:
+    needs: Imagem
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy na EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 44.208.123.202
+          username: ubuntu
+          key: ${{secrets.CHAVE}}
+          script: |
+              echo "Acesso Liberado"
+              sudo docker pull leonardo2608/api_homologacao:latest
+              sudo docker stop api_homologacao 2>/dev/null || true
+              sudo docker rm api_homologacao 2>/dev/null || true
+              
+              # instalar nova versao
+              sudo docker run --name api_homologacao -d -p 80:80 leonardo2608/apihomologacao:latest
